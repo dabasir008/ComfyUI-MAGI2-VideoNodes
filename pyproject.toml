@@ -6,5 +6,9 @@ requires-python = ">=3.10"
 license = { file = "LICENSE" }
 dependencies = ["requests>=2.31.0,<3", "numpy>=1.24.0", "Pillow>=10.0.0"]
 
+[project.urls]
+Repository = "https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub"
+Issues = "https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub/issues"
+
 [tool.comfy]
 DisplayName = "MAGI-2 for RunningHub"

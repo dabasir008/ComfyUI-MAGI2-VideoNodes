@@ -2,6 +2,8 @@
 
 ## 建议填写内容
 
+**GitHub 仓库地址：** https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub
+
 **插件名称：** MAGI-2 for RunningHub
 
 **一句话介绍：** MAGI-2 文生视频与图片/多模态参考视频节点，支持首尾帧、原生声音和 ComfyUI 媒体连线。

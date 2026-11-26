@@ -22,6 +22,12 @@
 
 需要 Python 3.10+，以及支持原生 `VIDEO` / `comfy_api.input_impl.VideoFromFile` 的 ComfyUI。
 
+在 ComfyUI 根目录克隆：
+
+```bash
+git clone https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub.git custom_nodes/ComfyUI-MAGI2-RunningHub
+```
+
 1. 将本仓库放入 `ComfyUI/custom_nodes/ComfyUI-MAGI2-RunningHub/`。根目录应直接包含 `__init__.py`，避免多嵌套一层文件夹。
 2. 在 **ComfyUI 自己的 Python 环境**中执行：
 
