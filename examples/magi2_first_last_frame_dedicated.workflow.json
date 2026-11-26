@@ -1,0 +1,205 @@
+{
+  "last_node_id": 20,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        20,
+        40
+      ],
+      "size": [
+        300,
+        320
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "upload_reference_1.png",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [
+        20,
+        390
+      ],
+      "size": [
+        300,
+        320
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "upload_reference_2.png",
+        "image"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Magi2FirstLastFrameRH",
+      "pos": [
+        420,
+        40
+      ],
+      "size": [
+        600,
+        720
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "first_frame",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "last_frame",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null,
+          "slot_index": 0
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 1
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 2
+        },
+        {
+          "name": "response_json",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Magi2FirstLastFrameRH"
+      },
+      "widgets_values": [
+        "Follow the reference subjects and scene; a slow cinematic camera move, natural ambient sound.",
+        5,
+        "16:9",
+        "1080p",
+        true,
+        0,
+        "fixed",
+        "",
+        1800,
+        5
+      ]
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [
+        1080,
+        40
+      ],
+      "size": [
+        450,
+        280
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "MAGI-2 focused node / 1080p / 4–30 seconds\nReplace the placeholder media before running.\nImages: at most 10 in total, including batches.\nVideos: up to 5; each 2–30s, total at most 30s.\nAudio: up to 5; each 2–30s, total at most 30s.\nReference generation does not guarantee exact motion copying or lip sync.\nTask recovery only queries/downloads an existing task; no new generation."
+      ],
+      "color": "#243",
+      "bgcolor": "#354"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      10,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      10,
+      1,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        30,
+        30
+      ]
+    }
+  },
+  "version": 0.4
+}

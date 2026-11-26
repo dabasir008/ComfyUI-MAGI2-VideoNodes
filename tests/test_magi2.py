@@ -106,8 +106,8 @@ class DummyVideo:
 
 
 class SchemaTests(unittest.TestCase):
-    def test_exactly_two_nodes_and_no_credentials_widgets(self):
-        self.assertEqual(len(NODE_CLASS_MAPPINGS), 2)
+    def test_eight_nodes_and_no_credentials_widgets(self):
+        self.assertEqual(len(NODE_CLASS_MAPPINGS), 8)
         for node in NODE_CLASS_MAPPINGS.values():
             inputs = node.INPUT_TYPES()
             names = set(inputs["required"]) | set(inputs["optional"])

@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-magi2-runninghub"
-version = "0.1.0"
-description = "Two ComfyUI nodes for MAGI-2 text, image, first/last frame and multimodal video through RunningHub OpenAPI"
+version = "0.2.0"
+description = "Eight ComfyUI nodes for MAGI-2 generation, native image/video/audio references and task recovery through RunningHub"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 dependencies = ["requests>=2.31.0,<3", "numpy>=1.24.0", "Pillow>=10.0.0"]

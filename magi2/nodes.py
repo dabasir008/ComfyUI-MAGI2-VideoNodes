@@ -1,4 +1,4 @@
-"""Exactly two workflow nodes; no key widgets or model-weight downloads."""
+"""MAGI-2 generation and recovery nodes without credential widgets."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .client import MagiError, RunningHubClient, Settings
-from .media import prepare_reference, upload_reference
+from .media import prepare_native_references, prepare_reference, upload_reference
 from .schema import ASPECT_RATIOS, MODES, common_payload, parse_urls
 
 
@@ -53,7 +53,10 @@ def _run(client, directory, video_class, endpoint, payload, resume_task_id):
     # Save the ID before the first query so a restart/interruption can resume it.
     print(f"[MAGI-2] taskId={task_id}")
     try:
-        _receipt(directory, task_id, endpoint=endpoint, status="QUERYING")
+        updates = {"status": "QUERYING"}
+        if endpoint:
+            updates["endpoint"] = endpoint
+        _receipt(directory, task_id, **updates)
     except OSError:
         raise MagiError(f"任务 {task_id} 已存在，但本地回执保存失败。请记录此ID并检查输出目录权限或磁盘空间。") from None
     url, response = client.poll(task_id)
@@ -194,11 +197,129 @@ class Magi2ReferenceVideoRH(_Base):
             return _run(client, directory, video_class, endpoint, payload, "")
 
 
+class Magi2ImageToVideoRH(Magi2ReferenceVideoRH):
+    DESCRIPTION = "专用单图图生视频节点。直接连接一张IMAGE，无需选择mode或填写URL；提示词可留空。"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"image": ("IMAGE",), **_inputs()}, "optional": _advanced()}
+
+    def generate(self, image, **kwargs):
+        return super().generate(mode="first_frame", first_frame=image, **kwargs)
+
+
+class Magi2FirstLastFrameRH(Magi2ReferenceVideoRH):
+    DESCRIPTION = "专用首尾帧视频节点。首帧和尾帧各连接一张IMAGE，调用官方imageUrl/endImageUrl参数。"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"first_frame": ("IMAGE",), "last_frame": ("IMAGE",), **_inputs()},
+                "optional": _advanced()}
+
+    def generate(self, first_frame, last_frame, **kwargs):
+        return super().generate(mode="first_last_frame", first_frame=first_frame, last_frame=last_frame, **kwargs)
+
+
+class _NativeReferenceBase(_Base):
+    PRIMARY = ""
+    MEDIA_TYPE = ""
+    LIMIT = 0
+    EXTRA_MEDIA = {}
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {f"{cls.PRIMARY}_1": (cls.MEDIA_TYPE,), **_inputs()},
+            "optional": {
+                **{f"{cls.PRIMARY}_{index}": (cls.MEDIA_TYPE,) for index in range(2, cls.LIMIT + 1)},
+                **cls.EXTRA_MEDIA, **_advanced(),
+            },
+        }
+
+    def generate(self, prompt, duration, aspect_ratio, resolution, generate_audio, seed,
+                 resume_task_id="", max_wait_seconds=1800, poll_interval=5, **references):
+        endpoint = "sand-ai/magi-2/reference-to-video"
+        if resume_task_id.strip():
+            client, directory, video_class, resume = self.context(max_wait_seconds, poll_interval, resume_task_id)
+            with client:
+                return _run(client, directory, video_class, endpoint, None, resume)
+        payload = common_payload(prompt, duration, aspect_ratio, resolution, generate_audio, seed)
+        allowed = {f"{self.PRIMARY}_{index}" for index in range(1, self.LIMIT + 1)} | set(self.EXTRA_MEDIA)
+        if set(references) - allowed:
+            raise MagiError("包含不支持的参考素材参数。")
+        if references.get(f"{self.PRIMARY}_1") is None:
+            raise MagiError(f"请连接{self.PRIMARY}_1输入。")
+        primary = [references[f"{self.PRIMARY}_{index}"] for index in range(1, self.LIMIT + 1)
+                   if references.get(f"{self.PRIMARY}_{index}") is not None]
+        media = {"image": [], "video": [], "audio": []}
+        media[self.PRIMARY] = primary
+        for name, kind in (("reference_images", "image"), ("reference_video", "video"), ("reference_audio", "audio")):
+            if references.get(name) is not None:
+                media[kind].append(references[name])
+        client, directory, video_class, _ = self.context(max_wait_seconds, poll_interval, "")
+        with client, prepare_native_references(media["image"], media["video"], media["audio"]) as uploads:
+            payload.update({key: [item.send(client) for item in items] for key, items in uploads.items()})
+            return _run(client, directory, video_class, endpoint, payload, "")
+
+
+class Magi2MultiImageReferenceRH(_NativeReferenceBase):
+    DESCRIPTION = "多图参考生视频：10个独立IMAGE入口，支持不同尺寸图片；所有输入批次合计最多10张，按编号顺序上传。"
+    PRIMARY, MEDIA_TYPE, LIMIT = "image", "IMAGE", 10
+
+
+class Magi2VideoReferenceRH(_NativeReferenceBase):
+    DESCRIPTION = (
+        "视频参考生视频：最多5个独立VIDEO入口，每段2–30秒，合计≤30秒；可附加图片和音频。"
+        "属于多模态参考生成，不保证逐帧复刻或专用动作迁移。"
+    )
+    PRIMARY, MEDIA_TYPE, LIMIT = "video", "VIDEO", 5
+    EXTRA_MEDIA = {"reference_images": ("IMAGE",), "reference_audio": ("AUDIO",)}
+
+
+class Magi2AudioReferenceRH(_NativeReferenceBase):
+    DESCRIPTION = (
+        "音频参考生视频：最多5个独立AUDIO入口，每段2–30秒，合计≤30秒；可附加图片和视频。"
+        "音频为生成参考，不保证保留原音轨或精确口型同步。"
+    )
+    PRIMARY, MEDIA_TYPE, LIMIT = "audio", "AUDIO", 5
+    EXTRA_MEDIA = {"reference_images": ("IMAGE",), "reference_video": ("VIDEO",)}
+
+
+class Magi2TaskResultRH(_Base):
+    DESCRIPTION = "输入已有MAGI-2任务ID，查询并下载成片。只调用query，不上传参考素材、不创建新生成任务。"
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        advanced = _advanced()
+        advanced.pop("resume_task_id")
+        return {"required": {"task_id": ("STRING", {"default": "", "tooltip": "已有MAGI-2任务ID。"})},
+                "optional": advanced}
+
+    def generate(self, task_id, max_wait_seconds=1800, poll_interval=5):
+        if not isinstance(task_id, str) or not task_id.strip():
+            raise MagiError("请填写已有MAGI-2任务ID。")
+        client, directory, video_class, resume = self.context(max_wait_seconds, poll_interval, task_id)
+        with client:
+            return _run(client, directory, video_class, None, None, resume)
+
+
 NODE_CLASS_MAPPINGS = {
     "Magi2TextToVideoRH": Magi2TextToVideoRH,
     "Magi2ReferenceVideoRH": Magi2ReferenceVideoRH,
+    "Magi2ImageToVideoRH": Magi2ImageToVideoRH,
+    "Magi2FirstLastFrameRH": Magi2FirstLastFrameRH,
+    "Magi2MultiImageReferenceRH": Magi2MultiImageReferenceRH,
+    "Magi2VideoReferenceRH": Magi2VideoReferenceRH,
+    "Magi2AudioReferenceRH": Magi2AudioReferenceRH,
+    "Magi2TaskResultRH": Magi2TaskResultRH,
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Magi2TextToVideoRH": "MAGI-2 文生视频 / Text to Video (RH)",
     "Magi2ReferenceVideoRH": "MAGI-2 图片·多模态参考 / Reference Video (RH)",
+    "Magi2ImageToVideoRH": "MAGI-2 单图图生视频 / Image to Video (RH)",
+    "Magi2FirstLastFrameRH": "MAGI-2 首尾帧视频 / First Last Frame (RH)",
+    "Magi2MultiImageReferenceRH": "MAGI-2 多图参考视频 / Multi Image Reference (RH)",
+    "Magi2VideoReferenceRH": "MAGI-2 多视频参考 / Video Reference (RH)",
+    "Magi2AudioReferenceRH": "MAGI-2 多音频参考 / Audio Reference (RH)",
+    "Magi2TaskResultRH": "MAGI-2 任务结果恢复 / Recover Task Result (RH)",
 }

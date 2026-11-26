@@ -1,0 +1,10 @@
+{
+  "10": {
+    "class_type": "Magi2TaskResultRH",
+    "inputs": {
+      "task_id": "replace_with_existing_task_id",
+      "max_wait_seconds": 1800,
+      "poll_interval": 5
+    }
+  }
+}

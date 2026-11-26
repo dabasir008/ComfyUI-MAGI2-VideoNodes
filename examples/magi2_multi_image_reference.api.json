@@ -1,0 +1,36 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "upload_reference_1.png"
+    }
+  },
+  "2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "upload_reference_2.png"
+    }
+  },
+  "10": {
+    "class_type": "Magi2MultiImageReferenceRH",
+    "inputs": {
+      "prompt": "Follow the reference subjects and scene; a slow cinematic camera move, natural ambient sound.",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "resolution": "1080p",
+      "generate_audio": true,
+      "seed": 0,
+      "resume_task_id": "",
+      "max_wait_seconds": 1800,
+      "poll_interval": 5,
+      "image_1": [
+        "1",
+        0
+      ],
+      "image_2": [
+        "2",
+        0
+      ]
+    }
+  }
+}

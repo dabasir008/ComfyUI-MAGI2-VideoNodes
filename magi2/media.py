@@ -58,13 +58,18 @@ def image_uploads(images, label, max_count):
     return uploads
 
 
-def video_upload(video, directory):
+def video_duration(video):
     if not hasattr(video, "get_duration") or not hasattr(video, "save_to"):
         raise MagiError("reference_video 需要原生 VIDEO 输入，请连接 LoadVideo 的 VIDEO 输出。")
     duration = float(video.get_duration())
     if not math.isfinite(duration) or not 2 <= duration <= 30:
         raise MagiError("参考视频必须为 2–30 秒；请先用视频裁剪节点处理。")
-    target = Path(directory) / "reference_video.mp4"
+    return duration
+
+
+def video_upload(video, directory, name="reference_video.mp4"):
+    video_duration(video)
+    target = Path(directory) / name
     # save_to respects VIDEO trim/crop operations; reading its original source
     # directly would accidentally upload the untrimmed/unmodified input.
     video.save_to(str(target), format="mp4", codec="h264")
@@ -146,3 +151,34 @@ def upload_reference(client, mode, urls, uploads):
     if mode == "first_last_frame":
         result["endImageUrl"] = uploads["endImageUrl"][0].send(client) if uploads["endImageUrl"] else urls["last"]
     return result
+
+
+@contextmanager
+def prepare_native_references(images=(), videos=(), audios=()):
+    """Multiple independent native sockets, including differently sized images.
+
+    Validate aggregate durations before video export or any network upload.
+    Each video gets its own file; files live until all uploads have finished.
+    """
+    if len(videos) > 5 or len(audios) > 5:
+        raise MagiError("参考视频和音频分别最多支持5段。")
+    if sum(video_duration(video) for video in videos) > 30 + 1e-6:
+        raise MagiError("所有本地参考视频合计不能超过30秒。")
+    image_files = []
+    for image in images:
+        image_files.extend(image_uploads(image, "reference_images", 10))
+        if len(image_files) > 10:
+            raise MagiError("所有图片输入中的图片合计不能超过10张。")
+    audio_files = [audio_upload(audio) for audio in audios]
+    audio_seconds = 0
+    for audio in audio_files:
+        with wave.open(io.BytesIO(audio.content), "rb") as source:
+            audio_seconds += source.getnframes() / source.getframerate()
+    if audio_seconds > 30 + 1e-6:
+        raise MagiError("所有本地参考音频合计不能超过30秒。")
+    if not image_files and not videos and not audio_files:
+        raise MagiError("至少需要一种参考素材。")
+    with TemporaryDirectory(prefix="magi2_multi_reference_") as directory:
+        video_files = [video_upload(video, directory, f"reference_video_{index + 1}.mp4")
+                       for index, video in enumerate(videos)]
+        yield {"imageUrls": image_files, "videoUrls": video_files, "audioUrls": audio_files}

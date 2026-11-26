@@ -1,11 +1,23 @@
 # MAGI-2 for ComfyUI / RunningHub
 
-两个独立 ComfyUI 节点，通过 **RunningHub 官方 OpenAPI v2** 调用 MAGI-2，便于搭建视频工作流。
+八个 ComfyUI 节点：七个生成入口和一个任务恢复工具，通过 **RunningHub 官方 OpenAPI v2** 调用 MAGI-2。版本 **0.2.0** 保留原有两个节点及其工作流兼容性，新增六个专用节点。
 
 | 节点 | 支持的任务 | 注册类名 |
 | --- | --- | --- |
 | MAGI-2 文生视频 | 提示词生成视频 | `Magi2TextToVideoRH` |
 | MAGI-2 图片·多模态参考 | 首帧图生、首尾帧过渡、图片/视频/音频参考 | `Magi2ReferenceVideoRH` |
+| MAGI-2 单图图生视频 | 一个独立 IMAGE 输入，无需选择模式 | `Magi2ImageToVideoRH` |
+| MAGI-2 首尾帧视频 | 两个必接 IMAGE 输入，分别指定首帧和尾帧 | `Magi2FirstLastFrameRH` |
+| MAGI-2 多图参考视频 | 十个独立 IMAGE 入口，支持不同尺寸图片，合计最多十张 | `Magi2MultiImageReferenceRH` |
+| MAGI-2 多视频参考 | 五个独立 VIDEO 入口，可附加图片和音频 | `Magi2VideoReferenceRH` |
+| MAGI-2 多音频参考 | 五个独立 AUDIO 入口，可附加图片和视频 | `Magi2AudioReferenceRH` |
+| MAGI-2 任务结果恢复 | 仅凭任务 ID 查询与下载已有结果 | `Magi2TaskResultRH` |
+
+**RunningHub 申请时提交这一个仓库地址即可包含全部八个节点：**
+
+https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub
+
+逐节点输入、接口、源码和示例见 [NODE_CATALOG.md](NODE_CATALOG.md)。官方目前提供三类模型接口；专用节点是在这些接口上提供不同的工作流输入方式，不代表八个不同模型。
 
 这是 API 节点包，模型运行在服务端；需要具备标准模型调用权限和余额的 RunningHub **企业级共享 API Key**。代码的 MIT 许可不包含模型服务的使用权，接口按 RunningHub 的规则计费。本项目独立开发，并非 RunningHub 或 MAGI 官方出品。
 
@@ -13,6 +25,7 @@
 
 - 原生 `IMAGE`、`VIDEO`、`AUDIO` 连线；本地参考素材自动编码并上传。
 - 多模态图片可以输入 `IMAGE` 批次；还可通过逐行 URL 或 JSON 数组添加参考素材。
+- 新增多图节点可直接连接不同尺寸图片；多视频、多音频节点可各连接五段原生素材，并先校验本地合计时长。
 - `VIDEO` 输出可接 `SaveVideo`、`GetVideoComponents` 等原生视频节点，保留生成视频自带的音轨。
 - 自动下载视频至 `ComfyUI/output/magi2/`，返回视频预览、原始视频 URL、任务 ID 和结果 JSON。
 - 在查询前保存任务回执；超时、重启或下载失败后，可按任务 ID 继续查询，避免重新生成。
@@ -70,6 +83,12 @@ $env:RUNNINGHUB_API_KEY = '<你的RunningHub企业级共享API Key>'
 | `magi2_first_frame.workflow.json` | 首帧图生视频 | 在 LoadImage 上传首帧 |
 | `magi2_first_last_frame.workflow.json` | 首尾帧过渡 | 上传首帧和尾帧 |
 | `magi2_multimodal_reference.workflow.json` | 多模态参考，示例默认以图片参考起步 | 上传参考图片；按需连接视频/音频或填写 URL |
+| `magi2_image_to_video.workflow.json` | 专用单图图生 | 上传图片 |
+| `magi2_first_last_frame_dedicated.workflow.json` | 专用首尾帧节点 | 上传首帧与尾帧 |
+| `magi2_multi_image_reference.workflow.json` | 独立图片连线，可用不同尺寸 | 上传示例中的两张参考图，按需继续添加 |
+| `magi2_video_reference.workflow.json` | 多视频参考 | 上传两段参考视频，每段至少两秒，合计不超过三十秒 |
+| `magi2_audio_reference.workflow.json` | 多音频参考 | 上传两段参考音频，每段至少两秒，合计不超过三十秒 |
+| `magi2_task_result.workflow.json` | 查询/下载已有任务 | 填写已有任务 ID，不需要提示词或参考素材 |
 
 ### 文生视频
 
@@ -95,7 +114,9 @@ $env:RUNNINGHUB_API_KEY = '<你的RunningHub企业级共享API Key>'
 - 同一类别中，连线素材排在 URL 素材之前。数量上限按两者合计检查。
 - URL 素材必须能被 RunningHub 服务端直接访问；本地磁盘路径和 `file://` 地址不适用。
 
-多条参考视频和音频可通过 URL 列表提供。本地连线入口各支持一个原生 VIDEO 和 AUDIO；图片入口支持批次。
+原有通用节点中，多条参考视频和音频可通过 URL 列表提供，本地连线入口各支持一个原生 VIDEO 和 AUDIO。新专用多视频/多音频节点分别提供五个原生 VIDEO/AUDIO 入口；多图节点提供十个 IMAGE 入口，所有图片批次合计最多十张。独立图片入口无需先合并到相同尺寸的图片批次。
+
+多视频和多音频节点使用官方多模态参考接口。视频作为生成参考，不是保证逐帧复刻的专用动作迁移；音频作为生成参考，不保证原声保留或精确口型同步。
 
 ### 参数与限制
 
@@ -126,6 +147,8 @@ $env:RUNNINGHUB_API_KEY = '<你的RunningHub企业级共享API Key>'
 3. 再次运行：只查询和下载已有任务，跳过上传和新建生成。
 4. 要生成新视频，请清空 `resume_task_id`，再修改提示词或种子等输入。
 
+也可以使用新的 **MAGI-2 任务结果恢复**节点：只填写 `task_id` 即可，无需补齐生成参数或重新连接媒体。
+
 **生成提交不自动重试。** 如果提交时网络中断且没有拿到任务 ID，请先检查 RunningHub API 调用记录。任务可能已创建，直接重新生成可能再次计费。查询中的临时网络错误会有限重试；中断本地等待不会取消服务端任务。
 
 官方说明结果 URL 通常只保留 24 小时。插件会立即下载至输出目录；请保留需要的视频文件。文件名含任务 ID 和随机后缀，不会覆盖其他视频。
@@ -155,13 +178,20 @@ python tools/build_examples.py --check
 
 ## English
 
-Two independent ComfyUI nodes for MAGI-2 through RunningHub OpenAPI v2:
+Eight ComfyUI nodes for MAGI-2 through RunningHub OpenAPI v2 (seven generation entry points and one recovery utility):
 
 - **Text to Video**: 1080p, 4–30 seconds, six aspect ratios, optional generated audio.
 - **Image / Multimodal Reference Video**: first frame, first + last frame, or image/video/audio references. Native IMAGE, VIDEO and AUDIO inputs are uploaded automatically; additional references can be supplied as URLs.
+- **Dedicated Image to Video** and **First / Last Frame**: simplified native IMAGE sockets.
+- **Multi Image Reference**: up to ten independent IMAGE sockets, including different image dimensions; ten images total across batches.
+- **Video Reference**: up to five native VIDEO references, with optional images and audio.
+- **Audio Reference**: up to five native AUDIO references, with optional images and video.
+- **Recover Task Result**: query and download by task ID; never submits a new generation.
+
+The official service exposes three generation API families. These nodes provide focused workflow interfaces, not eight separate models. Video/audio references do not guarantee exact motion copying or lip synchronization.
 
 Install this folder under `ComfyUI/custom_nodes`, install `requirements.txt` using ComfyUI's Python, set `RUNNINGHUB_API_KEY` or `RH_API_KEY`, and restart. Hosted RunningHub deployments can supply `PromptServer.instance.shared_api_key`. The service requires an enterprise shared key with model access and sufficient balance.
 
-Import the `.workflow.json` examples and replace placeholder images. Both nodes save an MP4 and return a native VIDEO, URL, task ID and response JSON. Use `resume_task_id` to retrieve an existing task without generating again. Generation submissions are never automatically retried. The included tests use offline API responses; a hosted generation smoke test is still required after platform installation.
+Import one of the ten `.workflow.json` examples and replace placeholder media. All nodes save an MP4 and return a native VIDEO, URL, task ID and response JSON. Use `resume_task_id` or the recovery node to retrieve an existing task without generating again. Generation submissions are never automatically retried. The included tests use offline API responses; a hosted generation smoke test is still required after platform installation.
 
 Independent project. MIT covers this node code only; model/API service terms and fees are separate.
