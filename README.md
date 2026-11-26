@@ -1,6 +1,6 @@
-# MAGI-2 for ComfyUI / RunningHub
+# MAGI-2 Video Nodes for ComfyUI
 
-八个 ComfyUI 节点：七个生成入口和一个任务恢复工具，通过 **RunningHub 官方 OpenAPI v2** 调用 MAGI-2。版本 **0.2.0** 保留原有两个节点及其工作流兼容性，新增六个专用节点。
+八个 ComfyUI 节点：七个生成入口和一个任务恢复工具，通过 **RunningHub 官方 OpenAPI v2** 调用 MAGI-2。版本 **0.2.1** 保留原有两个节点及其工作流兼容性，包含六个专用节点。
 
 | 节点 | 支持的任务 | 注册类名 |
 | --- | --- | --- |
@@ -15,7 +15,7 @@
 
 **RunningHub 申请时提交这一个仓库地址即可包含全部八个节点：**
 
-https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub
+https://github.com/dabasir008/ComfyUI-MAGI2-VideoNodes
 
 逐节点输入、接口、源码和示例见 [NODE_CATALOG.md](NODE_CATALOG.md)。官方目前提供三类模型接口；专用节点是在这些接口上提供不同的工作流输入方式，不代表八个不同模型。
 
@@ -38,14 +38,14 @@ https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub
 在 ComfyUI 根目录克隆：
 
 ```bash
-git clone https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub.git custom_nodes/ComfyUI-MAGI2-RunningHub
+git clone https://github.com/dabasir008/ComfyUI-MAGI2-VideoNodes.git custom_nodes/ComfyUI-MAGI2-VideoNodes
 ```
 
-1. 将本仓库放入 `ComfyUI/custom_nodes/ComfyUI-MAGI2-RunningHub/`。根目录应直接包含 `__init__.py`，避免多嵌套一层文件夹。
+1. 将本仓库放入 `ComfyUI/custom_nodes/ComfyUI-MAGI2-VideoNodes/`。根目录应直接包含 `__init__.py`，避免多嵌套一层文件夹。
 2. 在 **ComfyUI 自己的 Python 环境**中执行：
 
    ```bash
-   python -m pip install -r custom_nodes/ComfyUI-MAGI2-RunningHub/requirements.txt
+   python -m pip install -r custom_nodes/ComfyUI-MAGI2-VideoNodes/requirements.txt
    ```
 
 3. 配置凭据后重启 ComfyUI；搜索 `MAGI-2`，或进入 `RunningHub/MAGI-2` 分类。
@@ -53,7 +53,7 @@ git clone https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub.git custom_node
 Windows 便携版请从其根目录使用：
 
 ```powershell
-.\python_embeded\python.exe -m pip install -r .\ComfyUI\custom_nodes\ComfyUI-MAGI2-RunningHub\requirements.txt
+.\python_embeded\python.exe -m pip install -r .\ComfyUI\custom_nodes\ComfyUI-MAGI2-VideoNodes\requirements.txt
 ```
 
 ### 凭据

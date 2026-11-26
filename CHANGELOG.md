@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Renamed the repository to ComfyUI-MAGI2-VideoNodes and the plugin to MAGI-2 Video Nodes.
+- Updated package metadata, installation paths and platform submission links.
+- Preserved all eight registered node IDs and existing workflows.
+
 ## 0.2.0
 
 - Added dedicated Image to Video and First / Last Frame nodes.

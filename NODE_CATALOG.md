@@ -1,8 +1,8 @@
-# MAGI-2 全部节点清单（v0.2.0）
+# MAGI-2 全部节点清单（v0.2.1）
 
 **RunningHub 申请添加时填写仓库地址：**
 
-https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub
+https://github.com/dabasir008/ComfyUI-MAGI2-VideoNodes
 
 同一仓库包含全部八个节点。节点共用官方三类生成接口；以下列出的是工作流入口及工具，模型仍是 MAGI-2。
 

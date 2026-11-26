@@ -1,14 +1,14 @@
 [project]
-name = "comfyui-magi2-runninghub"
-version = "0.2.0"
+name = "comfyui-magi2-videonodes"
+version = "0.2.1"
 description = "Eight ComfyUI nodes for MAGI-2 generation, native image/video/audio references and task recovery through RunningHub"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 dependencies = ["requests>=2.31.0,<3", "numpy>=1.24.0", "Pillow>=10.0.0"]
 
 [project.urls]
-Repository = "https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub"
-Issues = "https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub/issues"
+Repository = "https://github.com/dabasir008/ComfyUI-MAGI2-VideoNodes"
+Issues = "https://github.com/dabasir008/ComfyUI-MAGI2-VideoNodes/issues"
 
 [tool.comfy]
-DisplayName = "MAGI-2 for RunningHub"
+DisplayName = "MAGI-2 Video Nodes"

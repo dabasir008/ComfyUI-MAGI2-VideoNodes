@@ -2,9 +2,9 @@
 
 ## 建议填写内容
 
-**GitHub 仓库地址：** https://github.com/dabasir008/ComfyUI-MAGI2-RunningHub
+**GitHub 仓库地址：** https://github.com/dabasir008/ComfyUI-MAGI2-VideoNodes
 
-**插件名称：** MAGI-2 for RunningHub
+**插件名称：** MAGI-2 Video Nodes
 
 **一句话介绍：** 八个 MAGI-2 节点，覆盖文生、单图、首尾帧、多图、多视频、多音频、通用多模态与任务恢复。
 
@@ -27,7 +27,7 @@ Magi2TaskResultRH
 
 **节点分类：** `RunningHub/MAGI-2`
 
-**版本：** `0.2.0`
+**版本：** `0.2.1`
 
 同一个仓库包含全部八个节点，无需按节点拆成多个仓库申请。逐节点清单及源码、示例链接见 [NODE_CATALOG.md](NODE_CATALOG.md)。
 
