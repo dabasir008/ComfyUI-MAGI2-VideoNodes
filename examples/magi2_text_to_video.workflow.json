@@ -1,0 +1,99 @@
+{
+  "last_node_id": 20,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 10,
+      "type": "Magi2TextToVideoRH",
+      "pos": [
+        420,
+        40
+      ],
+      "size": [
+        570,
+        500
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null,
+          "slot_index": 0
+        },
+        {
+          "name": "video_url",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 1
+        },
+        {
+          "name": "task_id",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 2
+        },
+        {
+          "name": "response_json",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Magi2TextToVideoRH"
+      },
+      "widgets_values": [
+        "A cinematic close-up of a glass perfume bottle on wet black marble, the camera slowly orbits, warm backlight, subtle ambient sound.",
+        5,
+        "16:9",
+        "1080p",
+        true,
+        0,
+        "fixed",
+        "",
+        1800,
+        5
+      ]
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [
+        1050,
+        40
+      ],
+      "size": [
+        430,
+        300
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "MAGI-2 / RunningHub\n1080p | 4–30 seconds | six aspect ratios\nAPI usage is billed by RunningHub.\nUpload your images into LoadImage before queuing.\nThe MAGI-2 node saves and previews MP4 automatically.\nConnect VIDEO to SaveVideo/GetVideoComponents for more processing.\nOn timeout, use resume_task_id to retrieve the existing task.\nMultimodal: optional LoadVideo.VIDEO / LoadAudio.AUDIO;\nadditional references: one URL per line, or a JSON array."
+      ],
+      "color": "#243",
+      "bgcolor": "#354"
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        30,
+        30
+      ]
+    }
+  },
+  "version": 0.4
+}

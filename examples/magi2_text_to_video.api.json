@@ -1,0 +1,16 @@
+{
+  "10": {
+    "class_type": "Magi2TextToVideoRH",
+    "inputs": {
+      "prompt": "A cinematic close-up of a glass perfume bottle on wet black marble, the camera slowly orbits, warm backlight, subtle ambient sound.",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "resolution": "1080p",
+      "generate_audio": true,
+      "seed": 0,
+      "resume_task_id": "",
+      "max_wait_seconds": 1800,
+      "poll_interval": 5
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "upload_your_reference.png"
+    }
+  },
+  "10": {
+    "class_type": "Magi2ReferenceVideoRH",
+    "inputs": {
+      "prompt": "A cinematic close-up of a glass perfume bottle on wet black marble, the camera slowly orbits, warm backlight, subtle ambient sound.",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "resolution": "1080p",
+      "generate_audio": true,
+      "seed": 0,
+      "resume_task_id": "",
+      "max_wait_seconds": 1800,
+      "poll_interval": 5,
+      "mode": "first_frame",
+      "first_frame_url": "",
+      "last_frame_url": "",
+      "image_urls": "",
+      "video_urls": "",
+      "audio_urls": "",
+      "first_frame": [
+        "1",
+        0
+      ]
+    }
+  }
+}
